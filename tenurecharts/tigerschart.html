@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Hades Tigers roster changes Seasons 1-24</title>
+	<head>
+		<script src="https://d3js.org/d3.v4.js"></script>
+		
+		<style>
+			.players, .axis { 
+				font: 16px sans-serif; 
+			}
+			
+			.legendBox {
+				width: 100px; 
+				margin: 20px; 
+				padding: 5px
+			}
+			
+			#sort {
+				padding: 5px;
+			}
+			
+			.pad-left {
+				margin: 10px 20px;
+			}
+			
+			table, td, th {
+				border: 1px solid black;
+				border-collapse: collapse;
+				padding: 10px;
+			}
+		</style>
+	</head>
+	
+	
+	<body>
+		<main>
+			<h1 style="margin: 30px">Hades Tigers roster changes S1-S24</h1>
+						
+			<div class="pad-left">
+				<label for="sort">Roster sorting order:</label>
+				<!-- the first option is the "default/initial" one. If you want to change the default, just reorder the options here -->
+				<select name="sort" id="sort" onChange="drawTenuresWithSorting()">
+					<option value="ORIG_ROSTER">Roster order in Season 1, roster changes cascading</option>
+					<option value="ALPHABETIC">Alphabetically by first name</option>
+					
+					<option value="FIRST_ORIG">First appearance on roster, then by roster order in Season 1</option>
+					<option value="FIRST_ALPHA">First appearance on roster, then alphabetically</option>
+					
+					<option value="LAST_ORIG">Latest appearance on roster, then by roster order in Season 1</option>
+					<option value="LAST_ALPHA">Latest appearance on roster, then alphabetically</option>
+					
+					<option value="LONGEST_ORIG">Longest time on roster, then by roster order in Season 1</option>
+					<option value="LONGEST_ALPHA">Longest time on roster, then alphabetically</option>
+				</select>
+				
+				<label for="shadowed"> Including time in shadows:</label>
+				<input type="checkbox" id="shadowed" name="shadowed" value="true" onChange="drawTenuresWithSorting()">
+			</div>
+			<details class="pad-left">
+					<summary>Notes about sorting</summary>
+					<p>"Roster order in Season 1, roster changes cascading" sorting option attempts to give a kind of overview of who replaced whom - if a Season 1 player A feedbacked for player B and then B was equivalent exchanged with C later, then A, B and C should be after one another. It's not perfect - the players who have left the team and come back mess it up something fierce, but an attempt was made.</p>
+					<p>For "longest time on the roster" options, note that it orders the players by the number of <em>days</em> on the roster, not seasons. Because the seasons have slightly different lengths, the order of players who spent, for example, one season on the roster may not look intuitive at first glance.</p>
+				</details>
+			
+			<div id="colorLegend" aria-hidden="true"></div>
+			
+			<div id="tenureGraph"></div>
+		
+			<p>Not included in the graph (or in the table): anyone who has been on Tigers roster for less than a full day (that is, Spears Rogers on Season 23 Day 95), anyone who has not actively played for the Tigers.</p>
+			<p>Data compiled from the <a href="https://blaseball.wiki/">Blaseball Wiki</a> and <a href="https://before.sibr.dev/">Before</a>.</p>
+			
+			<h2>Graph data in a table:</h2>
+			
+			<details>
+				<summary>Click to show</summary>
+				<div id="dataTable"></div>
+			</details>
+			
+			<noscript><table><tr><th>Player</th><th>Time on the roster</th></tr><tr><td>Fish Summer</td><td>Season 1 Day 1 - Season 6 Day 19 (batter)<br></td></tr><tr><td>Richmond Harrison</td><td>Season 6 Day 19 - Season 13 Elections (batter)<br></td></tr><tr><td>Landry Violence</td><td>Season 1 Day 1 - Season 3 Day 110 (batter)<br></td></tr><tr><td>Paula Turnip</td><td>Season 3 Day 110 - Season 8 Day 71 (batter)<br>Season 13 Elections - Season 21 Elections (batter)<br>Season 21 Elections - Season 22 Elections (pitcher)<br>Season 22 Elections - Season 23 Day 99 (shadowed)<br></td></tr><tr><td>Paula Mason</td><td>Season 8 Day 71 - Season 20 Elections (batter)<br></td></tr><tr><td>Dudley Mueller</td><td>Season 20 Elections - Season 21 Elections (batter)<br></td></tr><tr><td>Beasley Day</td><td>Season 21 Elections - Season 24 Day 99 (batter)<br></td></tr><tr><td>Nagomi McDaniel</td><td>Season 1 Day 1 - Season 1 Elections (batter)<br></td></tr><tr><td>Nolanestophia Patterson</td><td>Season 1 Elections - Season 2 Elections (batter)<br></td></tr><tr><td>Jessica Telephone</td><td>Season 2 Elections - Season 4 Day 43 (batter)<br>Season 15 Elections - Season 16 Elections (batter)<br></td></tr><tr><td>Spears Taylor</td><td>Season 4 Day 43 - Season 8 Elections (batter)<br></td></tr><tr><td>Aldon Cashmoney</td><td>Season 8 Elections - Season 12 Elections (batter)<br>Season 13 Elections - Season 18 Day 99 (batter)<br></td></tr><tr><td>Aldon Cashmoney II</td><td>Season 18 Elections - Season 19 Elections (batter)<br></td></tr><tr><td>Aldon Cashmoney III</td><td>Season 19 Day 73 - Season 19 Elections (batter)<br></td></tr><tr><td>Nerd Pacheco</td><td>Season 12 Elections - Season 13 Elections (batter)<br></td></tr><tr><td>Lachlan Shelton</td><td>Season 21 Elections - Season 22 Day 79 (batter)<br>Season 22 Day 79 - Season 22 Day 89 (shadowed)<br>Season 22 Day 89 - Season 22 Elections (batter)<br></td></tr><tr><td>Erin Jesaulenko</td><td>Season 22 Elections - Season 24 Day 5 (batter)<br>Season 24 Day 5 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Alyssa Harrell</td><td>Season 1 Day 1 - Season 3 Elections (batter)<br></td></tr><tr><td>McLaughlin Scorpler</td><td>Season 3 Elections - Season 7 Day 32 (batter)<br></td></tr><tr><td>Frasier Shmurmgle</td><td>Season 7 Day 32 - Season 7 Day 71 (batter)<br></td></tr><tr><td>Usurper Violet</td><td>Season 7 Day 71 - Season 15 Elections (batter)<br></td></tr><tr><td>Ayanna Dumpington</td><td>Season 16 Elections - Season 24 Day 99 (batter)<br></td></tr><tr><td>Peanutiel Duffy</td><td>Season 1 Day 1 - Season 9 Day X (batter)<br></td></tr><tr><td>Moody Cookbook</td><td>Season 1 Day 1 - Season 7 Day 32 (batter)<br></td></tr><tr><td>Carmelo Plums</td><td>Season 7 Day 32 - Season 13 Elections (batter)<br></td></tr><tr><td>Ren Morin</td><td>Season 1 Day 1 - Season 12 Elections (batter)<br>Season 12 Elections - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Matteo Triumphant</td><td>Season 1 Day 1 - Season 12 Elections (shadowed)<br>Season 12 Elections - Season 21 Day 114 (batter)<br>Season 21 Day 114 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Hatfield Suzuki</td><td>Season 21 Elections - Season 24 Day 99 (batter)<br></td></tr><tr><td>Zion Aliciakeyes</td><td>Season 1 Day 1 - Season 22 Day 4 (batter)<br>Season 22 Day 4 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Lottie Ceilingfan</td><td>Season 21 Day 99 - Season 22 Day 4 (shadowed)<br>Season 22 Day 4 - Season 22 Day 58 (batter)<br>Season 22 Day 58 - Season 22 Day 79 (shadowed)<br>Season 22 Day 79 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Irnee Bluesky</td><td>Season 18 Day 99 - Season 22 Day 58 (shadowed)<br>Season 22 Day 58 - Season 22 Day 89 (batter)<br>Season 22 Day 89 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Randy Castillo</td><td>Season 1 Day 1 - Season 22 Day 35 (batter)<br>Season 22 Day 35 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Daniel Koch</td><td>Season 1 Day 1 - Season 22 Day 35 (shadowed)<br>Season 22 Day 35 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Liquid Friend XVI</td><td>Season 22 Day 73 - Season 22 Elections (batter)<br></td></tr><tr><td>Uncle Plasma XVI</td><td>Season 22 Day 73 - Season 22 Elections (batter)<br></td></tr><tr><td>Parker MacMillan</td><td>Season 24 Day 45 - Season 24 Day 54 (batter)<br>Season 24 Day 72 - Season 24 Day 81 (batter)<br>Season 24 Day 90 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Nagomi Meng</td><td>Season 1 Day 1 - Season 8 Elections (pitcher)<br>Season 8 Elections - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Nicholas Mora</td><td>Season 1 Day 1 - Season 1 Elections (pitcher)<br>Season 13 Elections - Season 21 Elections (batter)<br></td></tr><tr><td>Yazmin Mason</td><td>Season 1 Elections - Season 7 Day 71 (pitcher)<br></td></tr><tr><td>Mummy Melcon</td><td>Season 7 Day 71 - Season 15 Elections (pitcher)<br>Season 15 Elections - Season 19 Elections (shadowed)<br>Season 19 Elections - Season 23 Day 88 (pitcher)<br>Season 23 Day 88 - Season 24 Day 5 (shadowed)<br>Season 24 Day 5 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Bartleby Zhivago</td><td>Season 23 Day 88 - Season 24 Day 68 (pitcher)<br>Season 24 Day 68 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Sullivan Septemberish</td><td>Season 1 Day 1 - Season 24 Day 68 (shadowed)<br>Season 24 Day 68 - Season 24 Day 99 (pitcher)<br></td></tr><tr><td>Hiroto Wilcox</td><td>Season 1 Day 1 - Season 16 Elections (pitcher)<br>Season 17 Elections - Season 23 Day 83 (pitcher)<br></td></tr><tr><td>Lenny Marijuana</td><td>Season 16 Elections - Season 17 Elections (pitcher)<br></td></tr><tr><td>Siobhan Chark</td><td>Season 23 Day 83 - Season 23 Day 95 (pitcher)<br></td></tr><tr><td>Walton Sports</td><td>Season 23 Day 95 - Season 24 Day 99 (pitcher)<br></td></tr><tr><td>Dunlap Figueroa</td><td>Season 1 Day 1 - Season 14 Day 79 (pitcher)<br>Season 14 Elections - Season 23 Day 43 (pitcher)<br></td></tr><tr><td>NaN</td><td>Season 14 Day 79 - Season 14 Elections (pitcher)<br></td></tr><tr><td>Famous Owens</td><td>Season 1 Day 1 - Season 19 Elections (pitcher)<br>Season 19 Elections - Season 21 Day 114 (shadowed)<br>Season 21 Day 114 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Mags Banananana</td><td>Season 23 Elections - Season 24 Day 99 (pitcher)<br></td></tr></table></noscript>
+		
+		<script>
+			//FIRST SOME UTILITY STUFF
+			const firstDay = {'startSeason': 1, 'startDay': 1}
+			const boxHeight = 20; //how "high" the box marking a player's tenure on the team is
+			const boxSpace = 5; //the vertical space between two players
+			
+			const reducer = (previousValue, currentValue) => previousValue + currentValue;
+			const mapTenureToLength = (tenure) => { return getWidth(tenure) };
+			const sortAscending = (a, b) => {  return a - b };
+			const sortDescending = (a, b) => {  return b - a };
+			
+			const scaling = 0.5 //all x values are scaled by this
+			
+			//GENERAL DATA
+			
+			//a list of how many days there were in each season. 
+			//days X and Semi-Centennial get an extra day
+			const daysInSeasons = [111, 111, 113, 112, 113, 110,
+								 113, 112, 117, 114, 120, 116,
+								 116, 117, 114, 117, 114, 116,
+								 117, 116, 115, 116, 118, 99];
+			const sumOfAllDays = daysInSeasons.reduce(reducer); //TODO: ...should I give every Election an extra day, too??
+			
+			//this one gets filled later, by default by the exact contents of the names below
+			//every time we change sorting, we put the newly sorted names here
+			let sortedNames = [];
+			
+			//TEAM SPECIFIC DATA STARTS HERE
+			
+			//batter and pitcher colors are selected from the Team Wiki page, shadowed is just a nice gray
+			const teamColors = {
+				batter: "#5c1c1c",
+				pitcher: "#c32229",
+				shadowed: "#cccccc"			
+			};
+						
+			//player names. this is the initial order they will be on the graph, top to bottom. linebreaks are just for readability when coding it
+			//if you want to keep the "Season 1 roster, changes cascading" sorting option, then the players should be in that order here.
+			//to make another sorting the default one, reorder the options in the select above
+			const names = ['Fish Summer', 'Richmond Harrison', 
+						   'Landry Violence', 'Paula Turnip', 'Paula Mason', 'Dudley Mueller', 'Beasley Day', 
+						   'Nagomi McDaniel', 'Nolanestophia Patterson', 'Jessica Telephone', 'Spears Taylor', 'Aldon Cashmoney', 'Aldon Cashmoney II', 'Aldon Cashmoney III',
+						   'Nerd Pacheco', 'Lachlan Shelton', 'Erin Jesaulenko',
+						   'Alyssa Harrell', 'McLaughlin Scorpler', 'Frasier Shmurmgle', 'Usurper Violet', 'Ayanna Dumpington',
+						   'Peanutiel Duffy',
+						   'Moody Cookbook', 'Carmelo Plums',
+						   'Ren Morin', 'Matteo Triumphant',
+						   'Hatfield Suzuki',
+						   'Zion Aliciakeyes', 'Lottie Ceilingfan', 'Irnee Bluesky',
+						   'Randy Castillo', 'Daniel Koch',
+						   'Liquid Friend XVI', 'Uncle Plasma XVI',
+						   'Parker MacMillan',
+						   'Nagomi Meng',
+						   'Nicholas Mora', 'Yazmin Mason', 'Mummy Melcon', 'Bartleby Zhivago', 'Sullivan Septemberish',
+						   'Hiroto Wilcox', 'Lenny Marijuana', 'Siobhan Chark', 'Walton Sports',
+						   'Dunlap Figueroa', 'NaN',
+						   'Famous Owens',
+						   'Mags Banananana'
+						  ];
+			
+			//this is the data that will make the boxes on the graph. order doesn't matter, they'll be ordered by sortedNames above, 
+			//but if two boxes *overlap* then later box will be drawn over earlier one
+			//the "player" value must match the player name above
+			//tenure start and end season and day are just numbers as they exist on the site. if either happened during elections, that's 'E'
+			//Days X are converted to "last day of the season", they don't get to be "X"
+			//if the player is a pitcher during the timespan in question, put "pitcher: true" there. if they are shadowed, then "shadowed: true". without either they'll be a batter
+			const tenures = [
+							{'player': 'Fish Summer', 'startSeason': 1, 'startDay': 1, 'endSeason': 6, 'endDay': 19},
+							{'player': 'Richmond Harrison', 'startSeason': 6, 'startDay': 19, 'endSeason': 13, 'endDay': 'E'},
+							{'player': 'Landry Violence', 'startSeason': 1, 'startDay': 1, 'endSeason': 3, 'endDay': 110},
+							{'player': 'Paula Turnip', 'startSeason': 3, 'startDay': 110, 'endSeason': 8, 'endDay': 71},
+							{'player': 'Paula Mason', 'startSeason': 8, 'startDay': 71, 'endSeason': 20, 'endDay': 'E'},
+							{'player': 'Dudley Mueller', 'startSeason': 20, 'startDay': 'E', 'endSeason': 21, 'endDay': 'E'},
+							{'player': 'Beasley Day', 'startSeason': 21, 'startDay': 'E', 'endSeason': 24, 'endDay': 99},
+							 
+							 {'player': 'Nagomi McDaniel', 'startSeason': 1, 'startDay': 1, 'endSeason': 1, 'endDay': 'E'},
+							 {'player': 'Nolanestophia Patterson', 'startSeason': 1, 'startDay': 'E', 'endSeason': 2, 'endDay': 'E'},
+							 {'player': 'Jessica Telephone', 'startSeason': 2, 'startDay': 'E', 'endSeason': 4, 'endDay': 43},
+							 {'player': 'Spears Taylor', 'startSeason': 4, 'startDay': 43, 'endSeason': 8, 'endDay': 'E'},
+							 {'player': 'Aldon Cashmoney', 'startSeason': 8, 'startDay': 'E', 'endSeason': 12, 'endDay': 'E'},
+							 {'player': 'Aldon Cashmoney', 'startSeason': 13, 'startDay': 'E', 'endSeason': 18, 'endDay': 99},
+							 {'player': 'Nerd Pacheco', 'startSeason': 12, 'startDay': 'E', 'endSeason': 13, 'endDay': 'E'},
+							 {'player': 'Nicholas Mora', 'startSeason': 13, 'startDay': 'E', 'endSeason': 21, 'endDay': 'E'},
+							 {'player': 'Lachlan Shelton', 'startSeason': 21, 'startDay': 'E', 'endSeason': 22, 'endDay': 79},
+							 {'player': 'Lachlan Shelton', 'startSeason': 22, 'startDay': 79, 'endSeason': 22, 'endDay': 89, shadowed: true},
+							 {'player': 'Lachlan Shelton', 'startSeason': 22, 'startDay': 89, 'endSeason': 22, 'endDay': 'E'},
+							 {'player': 'Erin Jesaulenko', 'startSeason': 22, 'startDay': 'E', 'endSeason': 24, 'endDay': 5},
+							 {'player': 'Erin Jesaulenko', 'startSeason': 24, 'startDay': 5, 'endSeason': 24, 'endDay': 99, shadowed: true},
+							 
+							 {'player': 'Aldon Cashmoney II', 'startSeason': 18, 'startDay': 'E', 'endSeason': 19, 'endDay': 'E'},
+							 {'player': 'Aldon Cashmoney III', 'startSeason': 19, 'startDay': 73, 'endSeason': 19, 'endDay': 'E'},
+							 
+							 {'player': 'Alyssa Harrell', 'startSeason': 1, 'startDay': 1, 'endSeason': 3, 'endDay': 'E'},
+							 {'player': 'McLaughlin Scorpler', 'startSeason': 3, 'startDay': 'E', 'endSeason': 7, 'endDay': 32},
+							 {'player': 'Frasier Shmurmgle', 'startSeason': 7, 'startDay': 32, 'endSeason': 7, 'endDay': 71},
+							 {'player': 'Usurper Violet', 'startSeason': 7, 'startDay': 71, 'endSeason': 15, 'endDay': 'E'},
+							 {'player': 'Jessica Telephone', 'startSeason': 15, 'startDay': 'E', 'endSeason': 16, 'endDay': 'E'},
+							 {'player': 'Ayanna Dumpington', 'startSeason': 16, 'startDay': 'E', 'endSeason': 24, 'endDay': 99},
+							 
+							 {'player': 'Peanutiel Duffy', 'startSeason': 1, 'startDay': 1, 'endSeason': 9, 'endDay': 117},
+							 
+							 {'player': 'Moody Cookbook', 'startSeason': 1, 'startDay': 1, 'endSeason': 7, 'endDay': 32},
+							 {'player': 'Carmelo Plums', 'startSeason': 7, 'startDay': 32, 'endSeason': 13, 'endDay': 'E'},
+							 {'player': 'Paula Turnip', 'startSeason': 13, 'startDay': 'E', 'endSeason': 21, 'endDay': 'E'},
+							 {'player': 'Paula Turnip', 'startSeason': 21, 'startDay': 'E', 'endSeason': 22, 'endDay': 'E', pitcher: true},
+							 {'player': 'Paula Turnip', 'startSeason': 22, 'startDay': 'E', 'endSeason': 23, 'endDay': 99, shadowed: true},
+							 
+							 {'player': 'Ren Morin', 'startSeason': 1, 'startDay': 1, 'endSeason': 12, 'endDay': 'E'},
+							 {'player': 'Ren Morin', 'startSeason': 12, 'startDay': 'E', 'endSeason': 24, 'endDay': 99, shadowed: true},
+							 {'player': 'Matteo Triumphant', 'startSeason': 1, 'startDay': 1, 'endSeason': 12, 'endDay': 'E', shadowed: true},
+							 {'player': 'Matteo Triumphant', 'startSeason': 12, 'startDay': 'E', 'endSeason': 21, 'endDay': 114},
+							 {'player': 'Matteo Triumphant', 'startSeason': 21, 'startDay': 114, 'endSeason': 24, 'endDay': 99, shadowed: true},
+							 
+							 {'player': 'Hatfield Suzuki', 'startSeason': 21, 'startDay': 'E', 'endSeason': 24, 'endDay': 99},
+							 
+							 {'player': 'Zion Aliciakeyes', 'startSeason': 1, 'startDay': 1, 'endSeason': 22, 'endDay': 4},
+							 {'player': 'Zion Aliciakeyes', 'startSeason': 22, 'startDay': 4, 'endSeason': 24, 'endDay': 99, shadowed: true},
+							 {'player': 'Lottie Ceilingfan', 'startSeason': 21, 'startDay': 99, 'endSeason': 22, 'endDay': 4, shadowed: true},
+							 {'player': 'Lottie Ceilingfan', 'startSeason': 22, 'startDay': 4, 'endSeason': 22, 'endDay': 58},
+							 {'player': 'Lottie Ceilingfan', 'startSeason': 22, 'startDay': 58, 'endSeason': 22, 'endDay': 79, shadowed: true},
+							 {'player': 'Lottie Ceilingfan', 'startSeason': 22, 'startDay': 79, 'endSeason': 24, 'endDay': 99},
+							 
+							 {'player': 'Irnee Bluesky', 'startSeason': 18, 'startDay': 99, 'endSeason': 22, 'endDay': 58, shadowed: true},
+							 {'player': 'Irnee Bluesky', 'startSeason': 22, 'startDay': 58, 'endSeason': 22, 'endDay': 89},
+							 {'player': 'Irnee Bluesky', 'startSeason': 22, 'startDay': 89, 'endSeason': 24, 'endDay': 99, shadowed: true},
+							 
+							 {'player': 'Randy Castillo', 'startSeason': 1, 'startDay': 1, 'endSeason': 22, 'endDay': 35},
+							 {'player': 'Randy Castillo', 'startSeason': 22, 'startDay': 35, 'endSeason': 24, 'endDay': 99, shadowed: true},
+							 {'player': 'Daniel Koch', 'startSeason': 1, 'startDay': 1, 'endSeason': 22, 'endDay': 35, shadowed: true},
+							 {'player': 'Daniel Koch', 'startSeason': 22, 'startDay': 35, 'endSeason': 24, 'endDay': 99},
+							 
+							 {'player': 'Liquid Friend XVI', 'startSeason': 22, 'startDay': 73, 'endSeason': 22, 'endDay': 'E'},
+							 {'player': 'Uncle Plasma XVI', 'startSeason': 22, 'startDay': 73, 'endSeason': 22, 'endDay': 'E'},
+							 
+							 {'player': 'Parker MacMillan', 'startSeason': 24, 'startDay': 45, 'endSeason': 24, 'endDay': 54},
+							 {'player': 'Parker MacMillan', 'startSeason': 24, 'startDay': 72, 'endSeason': 24, 'endDay': 81},
+							 {'player': 'Parker MacMillan', 'startSeason': 24, 'startDay': 90, 'endSeason': 24, 'endDay': 99},
+							 
+							 {'player': 'Nagomi Meng', 'startSeason': 1, 'startDay': 1, 'endSeason': 8, 'endDay': 'E', pitcher: true},
+							 {'player': 'Nagomi Meng', 'startSeason': 8, 'startDay': 'E', 'endSeason': 24, 'endDay': 99, shadowed: true},
+							 
+							 {'player': 'Nicholas Mora', 'startSeason': 1, 'startDay': 1, 'endSeason': 1, 'endDay': 'E', pitcher: true},
+							 {'player': 'Yazmin Mason', 'startSeason': 1, 'startDay': 'E', 'endSeason': 7, 'endDay': 71, pitcher: true},
+							 {'player': 'Mummy Melcon', 'startSeason': 7, 'startDay': 71, 'endSeason': 15, 'endDay': 'E', pitcher: true},
+							 {'player': 'Mummy Melcon', 'startSeason': 15, 'startDay': 'E', 'endSeason': 19, 'endDay': 'E', shadowed: true},
+							 {'player': 'Mummy Melcon', 'startSeason': 19, 'startDay': 'E', 'endSeason': 23, 'endDay': 88, pitcher: true},
+							 {'player': 'Mummy Melcon', 'startSeason': 23, 'startDay': 88, 'endSeason': 24, 'endDay': 5, shadowed: true},
+							 {'player': 'Mummy Melcon', 'startSeason': 24, 'startDay': 5, 'endSeason': 24, 'endDay': 99},
+							 {'player': 'Bartleby Zhivago', 'startSeason': 23, 'startDay': 12, 'endSeason': 23, 'endDay': 88, shadowed: true},
+							 {'player': 'Bartleby Zhivago', 'startSeason': 23, 'startDay': 88, 'endSeason': 24, 'endDay': 68, pitcher: true},
+							 {'player': 'Bartleby Zhivago', 'startSeason': 24, 'startDay': 68, 'endSeason': 24, 'endDay': 99, shadowed: true},
+							 {'player': 'Sullivan Septemberish', 'startSeason': 1, 'startDay': 1, 'endSeason': 24, 'endDay': 68, shadowed: true},
+							 {'player': 'Sullivan Septemberish', 'startSeason': 24, 'startDay': 68, 'endSeason': 24, 'endDay': 99, pitcher: true},
+							 
+							 
+							 {'player': 'Lenny Marijuana', 'startSeason': 16, 'startDay': 'E', 'endSeason': 17, 'endDay': 'E', pitcher: true},
+							 {'player': 'Hiroto Wilcox', 'startSeason': 1, 'startDay': 1, 'endSeason': 16, 'endDay': 'E', pitcher: true},
+							 {'player': 'Hiroto Wilcox', 'startSeason': 17, 'startDay': 'E', 'endSeason': 23, 'endDay': 83, pitcher: true},
+							 {'player': 'Siobhan Chark', 'startSeason': 23, 'startDay': 83, 'endSeason': 23, 'endDay': 95, pitcher: true},
+							 {'player': 'Walton Sports', 'startSeason': 23, 'startDay': 95, 'endSeason': 24, 'endDay': 99, pitcher: true},
+							 
+							 {'player': 'Dunlap Figueroa', 'startSeason': 1, 'startDay': 1, 'endSeason': 14, 'endDay': 79, pitcher: true},
+							 {'player': 'NaN', 'startSeason': 14, 'startDay': 79, 'endSeason': 14, 'endDay': 'E', pitcher: true},
+							 {'player': 'Dunlap Figueroa', 'startSeason': 14, 'startDay': 'E', 'endSeason': 23, 'endDay': 43, pitcher: true},
+							 
+							 {'player': 'Famous Owens', 'startSeason': 1, 'startDay': 1, 'endSeason': 19, 'endDay': 'E', pitcher: true},
+							 {'player': 'Famous Owens', 'startSeason': 19, 'startDay': 'E', 'endSeason': 21, 'endDay': 114, shadowed: true},
+							 {'player': 'Famous Owens', 'startSeason': 21, 'startDay': 114, 'endSeason': 24, 'endDay': 99},
+							 
+							 {'player': 'Mags Banananana', 'startSeason': 23, 'startDay': 'E', 'endSeason': 24, 'endDay': 99, pitcher: true},
+							]
+			
+			//TEAM SPECIFIC DATA ENDS HERE
+			
+			//D3 magic starts here
+			
+			const margin = {top: 30, right: 30, bottom: 50, left: 200},
+					width = scaleX(sumOfAllDays),
+					height = names.length * (boxHeight + boxSpace)
+			
+			//create the graph svg...
+				var svg = d3.select("#tenureGraph")
+					.append("svg")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+					.append("g")
+					.attr("transform",
+					  "translate(" + margin.left + "," + margin.top + ")");
+			
+			//draw those parts of the graph that do not change depending on sorting
+			drawStaticPartsOfTheGraph();
+			
+			//copy the names into the sortedNames array, then call the method that draws the Y axis, the bars, and recreate the table
+			sortedNames = names.slice(0, names.length);
+			drawTenuresWithSorting();
+			
+			//UTILITY METHODS
+			
+			//draws the color legend, x-axis and the season lines (which don't change)
+			function drawStaticPartsOfTheGraph() {
+				//let's make the color legend
+				d3.select("#colorLegend")
+					.append("p")
+					.attr("style", "margin-left: 20px;")
+					.text("Hover over the bars on the graph for more detailed info.")
+				d3.select("#colorLegend")
+					.append("p")
+					.attr("style", "margin-left: 20px;")
+					.text("Color legend:")
+				d3.select("#colorLegend")
+					.append("div")
+					.attr("class", "legendBox")
+					.attr("style", "background-color:"+ teamColors.batter +"; color: #fff;") //color: #fff makes the text white, because this background color is dark
+					.text("Batter")
+				d3.select("#colorLegend")
+					.append("div")
+					.attr("class", "legendBox")
+					.attr("style", "background-color:" + teamColors.pitcher + "; color: #fff;") 
+					.text("Pitcher")
+				d3.select("#colorLegend")
+					.append("div")
+					.attr("class", "legendBox")
+					.attr("style", "background-color:" + teamColors.shadowed)
+					.text("Shadowed")
+
+				//... x range (which does not change during sorting)...
+				const tickRange = d3.range(1, daysInSeasons.length +1, 1);
+				var x = d3.scaleBand()
+				.range([ 0, width ])
+				.domain(tickRange)
+				.padding(0.01);
+				svg.append("g")
+					.attr("transform", "translate(0," + height + ")")
+					.attr("class", "axis")
+					.call(d3.axisBottom(x)
+						  .tickValues(tickRange)
+						  .tickSize(0)
+						 );
+				svg.append("text")
+					.attr("class", "axis")
+					.attr("x", width /2)
+					.attr("y", height + margin.top + 10)
+					.text("Season");
+
+				//...season lines...
+				for(idx=0; idx<daysInSeasons.length; idx++) {
+					let xplace = daysInSeasons.slice(0, idx+1).reduce(reducer);
+					svg.append('line')
+						.attr('x1', scaleX(xplace)).attr('x2', scaleX(xplace))
+						.attr('y1', 0).attr('y2', height)
+						.attr('stroke', '#bbb')
+				};
+			}
+			
+			function drawTenuresWithSorting() {
+				//remove the Y axis with names, and all the tenure bars
+				d3.selectAll(".players").remove();
+				d3.selectAll(".tenure").remove();
+				
+				sortedNames = getNamesSorted(); //re-sort the names
+				
+				//draw the Y axis - this must have all the names in the sorted order
+				var y = d3.scaleBand()
+					.range([ 0, height ])
+					.domain(sortedNames)
+					.padding(0.01);
+					svg.append("g")
+						.attr("class", "axis")
+						.attr("class", "players")
+						.call(d3.axisLeft(y));
+				
+				//draw boxes!
+				svg.selectAll()
+					.data(tenures, function(d) {return d.startSeason+':'+d.startDay;})
+					.enter()
+					.append("rect")
+					.attr("class", "tenure")
+					.attr("x", function(d) { return scaleX(getX(d)) })
+					.attr("y", function(d) { return getY(d) })
+					.attr("width", function(d) { return scaleX(getWidth(d)) } )
+					.attr("height", boxHeight )
+					.style("fill", function(d) { return getColor(d)} )
+					.append("svg:title").text(function(d) { return getTooltip(d) })
+				
+				//add the data as a simple table, too
+				document.getElementById("dataTable").innerHTML = getTableHtml();
+			}
+			
+			//takes (2, 2) and returns 113 (because Season 2 Day 2 is the 113st day since the beginning of blaseball)
+			function convertSeasonDayToDaysSinceBeginning(season, day) {
+				//elections are the last day of the season, let's convert these
+				let convertedDay = day;
+				if (day === 'E') {
+					convertedDay = daysInSeasons[season -1];
+				}
+				
+				//all days in the preceding seasons + days in this season up to current
+				let daysSinceBeginning = 0;
+				if (season > 1) {
+					daysSinceBeginning += daysInSeasons.slice(0, season - 1).reduce(reducer);
+				}
+				daysSinceBeginning += convertedDay;
+				
+				return daysSinceBeginning;
+			}
+			
+			//calculates where the left side of a box should start
+			function getX(tenure) {
+				return convertSeasonDayToDaysSinceBeginning(tenure.startSeason, tenure.startDay)
+			}
+			
+			//calculates where the top of the box should start
+			function getY(tenure) {
+				const idxInNames = sortedNames.indexOf(tenure.player);
+				if (idxInNames > -1) {
+					return idxInNames * (boxHeight + boxSpace);
+				}
+			}
+			
+			//calculates the width of the box, aka number of days between beginning and end
+			function getWidth(tenure) {
+				let tenureBegin = convertSeasonDayToDaysSinceBeginning(tenure.startSeason, tenure.startDay);
+				let tenureEnd = convertSeasonDayToDaysSinceBeginning(tenure.endSeason, tenure.endDay);
+				
+				return tenureEnd - tenureBegin;
+			}
+			
+			//my x axis was so long I had to scroll right for ages, so I scaled all x values by a constant
+			function scaleX(value) {
+				return value * scaling
+			}
+			
+			//returns the correct color for the box
+			function getColor(tenure) {
+				if (tenure.shadowed) {
+					return teamColors.shadowed;
+				} else if (tenure.pitcher) {
+					return teamColors.pitcher;
+				} else {
+					return teamColors.batter;
+				}
+			}
+			
+			//returns the correct role for this tenure as a string
+			function getRole(tenure) {
+				if (tenure.shadowed) {
+					return "shadowed";
+				} else if (tenure.pitcher){
+					return "pitcher";				
+				} else {
+					return "batter";
+				}
+			}
+			
+			//creates the tooltip for the boxes
+			function getTooltip(tenure) {
+				let tip = tenure.player;
+				tip += " (" + getRole(tenure) + "), ";
+				tip += formatTenureTimespan(tenure);
+				
+				return tip;
+			}
+			
+			//takes in the tenure object and returns smth like "Season 13 Elections - Season 20 Day 4"
+			function formatTenureTimespan(tenure) {
+				return makeDate(tenure.startSeason, tenure.startDay) + " - " + makeDate(tenure.endSeason, tenure.endDay);
+			}
+			
+			//takes in (23, 5) and returns "Season 23 Day 5"
+			function makeDate(season, day) {
+				//Days X, because otherwise we just don't know
+				if (season === 9 && day === 117) {
+					return "Season 9 Day X";
+				} else if (season ===10 && day === 114) {
+					return "Season 10 Day X";
+				}
+				
+				let date = "Season " + season;
+				if (day === "E") {
+					return date += " Elections";
+				} else {
+					return date + " Day " + day;
+				}
+			}
+			
+			//returns all the tenures of given player, sorted by the start day
+			function getTenuresOfPlayerSortedByOrder(playerName) {
+				let tenuresOfPlayer = tenures.filter((tenure => {
+						return tenure.player === playerName
+					})).sort((a, b) => {
+						if (a.startSeason === b.startSeason) {
+							if (a.startDay === 'E') return 1
+							if (b.startDay === 'E') return -1
+							return a.startDay - b.startDay
+						}
+						return a.startSeason - b.startSeason
+					});
+				return tenuresOfPlayer;
+			}
+			
+			//returnes the tenures of the player, not including the shadowed ones, sorted by start day
+			function getTenuresOfPlayerOnActiveRosterSortedByStart(playerName) {
+				return getTenuresOfPlayerSortedByOrder(playerName).filter(tenure => {
+					return tenure.shadowed !== true
+				});
+			}
+			
+			//this and the following method kludge together the data for the table. I don't think I can make it much prettier than that
+			function getTableHtml() {
+				let tableHtml = "<table><tr><th>Player</th><th>Time on the roster</th></tr>";
+				for (idx=0; idx<sortedNames.length; idx++) {
+					let tenuresOfPlayer = getTenuresOfPlayerSortedByOrder(sortedNames[idx]);
+				
+					tableHtml += "<tr><td>" + sortedNames[idx] + "</td><td>" + formatTenuresOfPlayerForTable(tenuresOfPlayer) + "</td></tr>"
+				}
+				tableHtml +="</table>";
+				//console.log(tableHtml);
+				return tableHtml;
+			}
+			
+			function formatTenuresOfPlayerForTable(tenuresOfPlayer) {
+				let tenureString = "";
+				for(i=0; i<tenuresOfPlayer.length; i++) {
+					tenureString += formatTenureTimespan(tenuresOfPlayer[i]) + " (" + getRole(tenuresOfPlayer[i]) + ")<br>";
+				}
+				return tenureString;
+			}
+			
+			// ALL THE GNARLY SORTING METHODS
+			
+			//sort the names by the new sorting option given, return the sorted array
+			function getNamesSorted() {
+				let sort = document.getElementById('sort').value;
+				let includeShadows = document.getElementById('shadowed').checked;
+				let isSecondarySortByOriginalRoster = sort.endsWith("ORIG");
+				
+				//if you know Javascript you may now ask me "isn't it kind of stupid to slice the names array every time?"
+				//yes. but I want to be very sure that the original names stays the same, and this seemed the easiest way with pure JS
+				let namesForSorting = names.slice(0, names.length);
+				
+				if ("ORIG_ROSTER" === sort) { //original roster, changes cascading
+					return namesForSorting;
+				} else if ("ALPHABETIC" === sort) { //alphabetic
+					return namesForSorting.sort();
+				} else if (sort.startsWith("FIRST")) { //first appearance			
+					if (includeShadows) {
+						return namesForSorting.sort((a, b) =>{ return sortByFirstAppearance(a, b, isSecondarySortByOriginalRoster) })
+					} else {
+						return namesForSorting.sort((a, b) => { return sortByFirstAppearanceOnActiveRoster(a, b, isSecondarySortByOriginalRoster) })
+					}
+				} else if (sort.startsWith("LAST")) { //latest appearance
+					if (includeShadows) {
+						return namesForSorting.sort((a, b) => { return sortByLastAppearance(a, b, isSecondarySortByOriginalRoster) })
+					} else {
+						return namesForSorting.sort((a, b) => { return sortByLastAppearanceOnActiveRoster(a, b, isSecondarySortByOriginalRoster) })
+					}
+				} else if (sort.startsWith("LONGEST")) { //longest time
+					if (includeShadows) {
+						return namesForSorting.sort((a, b) => { return sortByTenure(a, b, isSecondarySortByOriginalRoster) })
+					} else {
+						return namesForSorting.sort((a, b) => { return sortByTenureOnActiveRoster(a, b, isSecondarySortByOriginalRoster) })
+					}
+				}
+				
+				return names; //if all else fails, let's return the default
+			}
+			
+			//sorting method
+			//sorts by first appearance on the roster (earlier first)
+			function sortByFirstAppearance(one, other, secondarySortByOriginalRoster) {
+				return sortUtilityMethod(one, other, "FIRST", true, secondarySortByOriginalRoster);
+			}
+			
+			//sorting method
+			//sorts by first appearance on the ACTIVE roster (earlier first, shadows not included)
+			function sortByFirstAppearanceOnActiveRoster(one, other, secondarySortByOriginalRoster) {
+				return sortUtilityMethod(one, other, "FIRST", false, secondarySortByOriginalRoster);
+			}
+			
+			//sorting method
+			//sorts by latest appearance on the roster (latest first)
+			function sortByLastAppearance(one, other, secondarySortByOriginalRoster) {
+				return sortUtilityMethod(one, other, "LAST", true, secondarySortByOriginalRoster);
+			}
+			
+			//sorting method
+			//sorts by latest appearance on the ACTIVE roster (latest first, shadows not included)
+			function sortByLastAppearanceOnActiveRoster(one, other, secondarySortByOriginalRoster) {
+				return sortUtilityMethod(one, other, "LAST", false, secondarySortByOriginalRoster);
+			}
+			
+			//sorting method
+			//sorts by time on the roster (longest first)
+			function sortByTenure(one, other, secondarySortByOriginalRoster) {
+				return sortUtilityMethod(one, other, "LONGEST", true, secondarySortByOriginalRoster);
+			}
+			
+			//sorting method
+			//sorts by time on the ACTIVE roster (longest first, shadows not included)
+			function sortByTenureOnActiveRoster(one, other, secondarySortByOriginalRoster) {
+				return sortUtilityMethod(one, other, "LONGEST", false, secondarySortByOriginalRoster);
+			}
+			
+			//the very ugly main sorting method
+			//one and other are the things we're sorting
+			//metric is the sorting metric . "FIRST" for first appearance, "LAST" for latest appearance, "LONGEST" for longest tenure
+			//includeShadows is whether tenure in shadows should be considered when calculating the metric
+			//secondarySortByOriginalRoster handles the cases where two players are equal by our primary sorting method
+			// - if it is true, the two "equal" players are ordered by their order on the original roster. if not, they are ordered alphabetically
+			function sortUtilityMethod(one, other, metric, includeShadows, secondarySortByOriginalRoster) {
+				let onesMetric = getCorrectValueForPlayerComparison(one, metric, includeShadows);
+				let othersMetric = getCorrectValueForPlayerComparison(other, metric, includeShadows);
+				
+				let order = 0;
+				if ("LAST" === metric || "LONGEST" === metric) { //if we're sorting by last appearance or longest time, we want big ones first
+					order = othersMetric - onesMetric;
+				} else {
+					order = onesMetric - othersMetric;
+				}
+				
+				if (order === 0) { //they were equal by our primary sorting metric, now we gotta sort them by the secondary method
+					if (secondarySortByOriginalRoster) { //sort by orig roster
+						order = names.indexOf(one) - names.indexOf(other);
+					} else { //sort alphabetically
+						return one > other ? 1 : -1;
+					}
+				}
+				return order;
+			
+			}
+			
+			function getCorrectValueForPlayerComparison(player, metric, includeShadows) {
+				let value = 0;
+				
+				if (includeShadows) {
+					if ("FIRST" === metric) {
+						value = getPlayersFirstDayOnRoster(player);
+					} else if ("LAST" === metric) {
+						value = getPlayersLastDayOnRoster(player);
+					} else if ("LONGEST" === metric) {
+						value = getPlayersTimeOnRoster(player);
+					}
+				} else {
+					if ("FIRST" === metric) {
+						value = getPlayersFirstDayOnActiveRoster(player);
+					} else if ("LAST" === metric) {
+						value = getPlayersLastDayOnActiveRoster(player);
+					} else if ("LONGEST" === metric) {
+						value = getPlayersTimeOnActiveRoster(player);
+					}
+				}
+				
+				return value;
+			}
+			
+			//takes player's name and returns the first day they were on the roster - the numerical version
+			function getPlayersFirstDayOnRoster(playerName) {
+				const firstDay = getTenuresOfPlayerSortedByOrder(playerName).map(tenure => {
+					return convertSeasonDayToDaysSinceBeginning(tenure.startSeason, tenure.startDay)
+				}).sort(sortAscending)[0];
+				return firstDay;
+			}
+			
+			//takes player's name and returns the first day they were on the ACTIVE roster - the numerical version
+			function getPlayersFirstDayOnActiveRoster(playerName) {
+				const firstDay = getTenuresOfPlayerOnActiveRosterSortedByStart(playerName).map(tenure => {
+					return convertSeasonDayToDaysSinceBeginning(tenure.startSeason, tenure.startDay)
+				}).sort(sortAscending)[0];
+				return firstDay;
+			}
+			
+			//takes player's name and returns the final day they were on the roster - the numerical version
+			function getPlayersLastDayOnRoster(playerName) {
+				return getTenuresOfPlayerSortedByOrder(playerName).map(tenure => {
+					return convertSeasonDayToDaysSinceBeginning(tenure.endSeason, tenure.endDay)
+				}).sort(sortDescending)[0];
+			}
+			
+			//takes player's name and returns the last day they were on the ACTIVE roster - the numerical version
+			function getPlayersLastDayOnActiveRoster(playerName) {
+				return getTenuresOfPlayerOnActiveRosterSortedByStart(playerName).map(tenure => {
+					return convertSeasonDayToDaysSinceBeginning(tenure.endSeason, tenure.endDay)
+				}).sort(sortDescending)[0];
+			}
+			
+			//takes player's name and returns the number of days they were on roster
+			function getPlayersTimeOnRoster(playerName) {
+				return getTenuresOfPlayerSortedByOrder(playerName)
+					.map(mapTenureToLength).reduce(reducer);
+			}
+			
+			//takes player's name and returns the number of days were on the ACTIVE roster
+			function getPlayersTimeOnActiveRoster(playerName) {
+				return getTenuresOfPlayerOnActiveRosterSortedByStart(playerName)
+					.map(mapTenureToLength).reduce(reducer);
+			}
+		</script>
+		</main>
+	</body>
+</html>
