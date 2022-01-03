@@ -120,9 +120,9 @@
 			//to make another sorting the default one, reorder the options in the select above
 			const names = ['Fish Summer', 'Richmond Harrison', 
 						   'Landry Violence', 'Paula Turnip', 'Paula Mason', 'Dudley Mueller', 'Beasley Day', 
-						   'Nagomi McDaniel', 'Nolanestophia Patterson', 'Jessica Telephone', 'Spears Taylor', 'Aldon Cashmoney', 'Aldon Cashmoney II', 'Aldon Cashmoney III',
+						   'Nagomi Mcdaniel', 'Nolanestophia Patterson', 'Jessica Telephone', 'Spears Taylor', 'Aldon Cashmoney', 'Aldon Cashmoney II', 'Aldon Cashmoney III',
 						   'Nerd Pacheco', 'Lachlan Shelton', 'Erin Jesaulenko',
-						   'Alyssa Harrell', 'McLaughlin Scorpler', 'Frasier Shmurmgle', 'Usurper Violet', 'Ayanna Dumpington',
+						   'Alyssa Harrell', 'Mclaughlin Scorpler', 'Frasier Shmurmgle', 'Usurper Violet', 'Ayanna Dumpington',
 						   'Peanutiel Duffy',
 						   'Moody Cookbook', 'Carmelo Plums',
 						   'Ren Morin', 'Matteo Triumphant',
@@ -154,7 +154,7 @@
 							{'player': 'Dudley Mueller', 'startSeason': 20, 'startDay': 'E', 'endSeason': 21, 'endDay': 'E'},
 							{'player': 'Beasley Day', 'startSeason': 21, 'startDay': 'E', 'endSeason': 24, 'endDay': 99},
 							 
-							 {'player': 'Nagomi McDaniel', 'startSeason': 1, 'startDay': 1, 'endSeason': 1, 'endDay': 'E'},
+							 {'player': 'Nagomi Mcdaniel', 'startSeason': 1, 'startDay': 1, 'endSeason': 1, 'endDay': 'E'},
 							 {'player': 'Nolanestophia Patterson', 'startSeason': 1, 'startDay': 'E', 'endSeason': 2, 'endDay': 'E'},
 							 {'player': 'Jessica Telephone', 'startSeason': 2, 'startDay': 'E', 'endSeason': 4, 'endDay': 43},
 							 {'player': 'Spears Taylor', 'startSeason': 4, 'startDay': 43, 'endSeason': 8, 'endDay': 'E'},
@@ -172,7 +172,7 @@
 							 {'player': 'Aldon Cashmoney III', 'startSeason': 19, 'startDay': 73, 'endSeason': 19, 'endDay': 'E'},
 							 
 							 {'player': 'Alyssa Harrell', 'startSeason': 1, 'startDay': 1, 'endSeason': 3, 'endDay': 'E'},
-							 {'player': 'McLaughlin Scorpler', 'startSeason': 3, 'startDay': 'E', 'endSeason': 7, 'endDay': 32},
+							 {'player': 'Mclaughlin Scorpler', 'startSeason': 3, 'startDay': 'E', 'endSeason': 7, 'endDay': 32},
 							 {'player': 'Frasier Shmurmgle', 'startSeason': 7, 'startDay': 32, 'endSeason': 7, 'endDay': 71},
 							 {'player': 'Usurper Violet', 'startSeason': 7, 'startDay': 71, 'endSeason': 15, 'endDay': 'E'},
 							 {'player': 'Jessica Telephone', 'startSeason': 15, 'startDay': 'E', 'endSeason': 16, 'endDay': 'E'},
@@ -255,9 +255,9 @@
 			
 			//D3 magic starts here
 			
-			const margin = {top: 30, right: 30, bottom: 50, left: 200},
+			const margin = {top: 40, right: 30, bottom: 50, left: 200},
 					width = scaleX(sumOfAllDays),
-					height = names.length * (boxHeight + boxSpace)
+					height = names.length * (boxHeight + boxSpace) + boxSpace //boxheight + boxSpace for every player, and then one more boxSpace at the top
 			
 			//create the graph svg...
 				var svg = d3.select("#tenureGraph")
@@ -316,11 +316,23 @@
 					.call(d3.axisBottom(x)
 						  .tickValues(tickRange)
 						  .tickSize(0)
-						 );
+						 );				
 				svg.append("text")
 					.attr("class", "axis")
 					.attr("x", width /2)
-					.attr("y", height + margin.top + 10)
+					.attr("y", height + margin.top)
+					.text("Season");
+				
+				svg.append("g")
+					.attr("class", "axis")
+					.call(d3.axisTop(x)
+						  .tickValues(tickRange)
+						  .tickSize(0)
+						 );
+				svg.append("text")
+					.attr("class", "axis")
+					.attr("x", width/2)
+					.attr("y", -(margin.top -15))
 					.text("Season");
 
 				//...season lines...
@@ -394,7 +406,7 @@
 			function getY(tenure) {
 				const idxInNames = sortedNames.indexOf(tenure.player);
 				if (idxInNames > -1) {
-					return idxInNames * (boxHeight + boxSpace);
+					return idxInNames * (boxHeight + boxSpace) + boxSpace;
 				}
 			}
 			
@@ -454,6 +466,8 @@
 					return "Season 9 Day X";
 				} else if (season ===10 && day === 114) {
 					return "Season 10 Day X";
+				} else if (season === 23 && day === 118) {
+					return "Season 23, Semi-Centennial";
 				}
 				
 				let date = "Season " + season;
