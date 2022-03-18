@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Yellowstone Magic roster changes Seasons 1-24</title>
+	<head>
+		<script src="https://d3js.org/d3.v4.js"></script>
+		
+		<script src="https://d3js.org/d3.v4.js"></script>
+		
+		<script src="data/general_data.js"></script>
+		<script src="data/magic_data.js"></script>
+		
+		<script src="script/utility.js"></script>
+		<script src="script/charting.js"></script>
+		<script src="script/sorting.js"></script>
+		
+		<link rel="stylesheet" href="style.css">
+		
+	</head>
+	
+	
+	<body>
+		<main>
+			<h1 style="margin: 30px">Yellowstone Magic roster changes S1-S24</h1>
+						
+			<div class="pad-left">
+				<label for="sort">Roster sorting order:</label>
+				<!-- the first option is the "default/initial" one. If you want to change the default, just reorder the options here -->
+				<select name="sort" id="sort" onChange="drawTenuresWithSorting()">
+					<option value="ORIG_ROSTER">Roster order in Season 1, roster changes cascading</option>
+					<option value="ALPHABETIC">Alphabetically by first name</option>
+					
+					<option value="FIRST_ORIG">First appearance on roster, then by roster order in Season 1</option>
+					<option value="FIRST_ALPHA">First appearance on roster, then alphabetically</option>
+					
+					<option value="LAST_ORIG">Latest appearance on roster, then by roster order in Season 1</option>
+					<option value="LAST_ALPHA">Latest appearance on roster, then alphabetically</option>
+					
+					<option value="LONGEST_ORIG">Longest time on roster, then by roster order in Season 1</option>
+					<option value="LONGEST_ALPHA">Longest time on roster, then alphabetically</option>
+				</select>
+				
+				<label for="shadowed"> Including time in shadows:</label>
+				<input type="checkbox" id="shadowed" name="shadowed" value="true" onChange="drawTenuresWithSorting()">
+			</div>
+			<details class="pad-left">
+					<summary>Notes about sorting</summary>
+					<p>"Roster order in Season 1, roster changes cascading" sorting option attempts to give a kind of overview of who replaced whom - if a Season 1 player A feedbacked for player B and then B was equivalent exchanged with C later, then A, B and C should be after one another. It's not perfect - the players who have left the team and come back mess it up something fierce, but an attempt was made.</p>
+					<p>For "longest time on the roster" options, note that it orders the players by the number of <em>days</em> on the roster, not seasons. Because the seasons have slightly different lengths, the order of players who spent, for example, one season on the roster may not look intuitive at first glance.</p>
+				</details>
+			
+			<div id="colorLegend" aria-hidden="true"></div>
+			
+			<div id="tenureGraph"></div>
+		
+			<p>Not included in the graph (or in the table): anyone who has been on Magic roster for less than a full day, anyone who has not actively played for the Magic.</p>
+			
+			<h2>Graph data in a table:</h2>
+			
+			<details>
+				<summary>Click to show</summary>
+				<div id="dataTable"></div>
+			</details>
+			
+			<noscript><table><tr><th>Player</th><th>Time on the roster</th></tr><tr><td>Washer Barajas</td><td>Season 1 Day 1 - Season 14 Elections (batter)<br>Season 14 Elections - Season 21 Day 81 (shadowed)<br>Season 21 Day 81 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Sutton Picklestein</td><td>Season 1 Day 1 - Season 13 Day 13 (batter)<br></td></tr><tr><td>Kurt Crueller</td><td>Season 13 Day 13 - Season 15 Day 78 (batter)<br></td></tr><tr><td>Francisco Preston</td><td>Season 1 Day 1 - Season 16 Day 30 (batter)<br>Season 16 Day 30 - Season 16 Elections (pitcher)<br>Season 16 Elections - Season 17 Elections (shadowed)<br>Season 17 Elections - Season 24 Day 99 (batter)<br></td></tr><tr><td>Melton Telephone</td><td>Season 1 Day 1 - Season 16 Elections (shadowed)<br>Season 16 Elections - Season 18 Elections (pitcher)<br>Season 18 Elections - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Bevan Wise</td><td>Season 1 Day 1 - Season 17 Elections (batter)<br>Season 18 Elections - Season 20 Day 32 (batter)<br>Season 20 Day 32 - Season 23 Day 80 (pitcher)<br>Season 23 Day 80 - Season 23 Day 87 (shadowed)<br>Season 23 Day 87 - Season 23 Day 104 (batter)<br>Season 23 Day 104 - Season 24 Day 33 (shadowed)<br>Season 24 Day 33 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Sexton Wheerer</td><td>Season 17 Elections - Season 18 Elections (batter)<br></td></tr><tr><td>Kirkland Sobremesa</td><td>Season 1 Day 1 - Season 23 Day 104 (shadowed)<br>Season 23 Day 104 - Season 24 Day 33 (batter)<br>Season 24 Day 33 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Richardson Turquoise</td><td>Season 1 Day 1 - Season 5 Day 40 (batter)<br></td></tr><tr><td>Annie Roland</td><td>Season 5 Day 40 - Season 10 Day 39 (batter)<br></td></tr><tr><td>Bonk Jokes</td><td>Season 10 Day 39 - Season 21 Day 95 (batter)<br>Season 21 Day 95 - Season 22 Day 49 (shadowed)<br>Season 22 Day 49 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Penelope Mathews</td><td>Season 1 Day 1 - Season 4 Day 15 (batter)<br></td></tr><tr><td>Alyssa Harrell</td><td>Season 4 Day 15 - Season 7 Day 73 (batter)<br></td></tr><tr><td>Terrell Bradley</td><td>Season 7 Day 73 - Season 8 Elections (batter)<br></td></tr><tr><td>Chorby Short</td><td>Season 8 Elections - Season 15 Day 33 (batter)<br></td></tr><tr><td>Sosa Elftower</td><td>Season 1 Day 1 - Season 2 Day 64 (batter)<br></td></tr><tr><td>Halexandrey Walton</td><td>Season 2 Day 64 - Season 5 Day 98 (batter)<br>Season 19 Elections - Season 21 Day 86 (batter)<br>Season 21 Day 86 - Season 21 Day 95 (shadowed)<br>Season 21 Day 95 - Season 21 Elections (batter)<br>Season 21 Elections - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Wyatt Glover</td><td>Season 5 Day 98 - Season 13 Elections (batter)<br>Season 13 Elections - Season 14 Elections (shadowed)<br>Season 14 Elections - Season 15 Day 4 (batter)<br>Season 20 Elections - Season 21 Elections (batter)<br>Season 21 Elections - Season 22 Day 99 (pitcher)<br></td></tr><tr><td>Tiana Wheeler</td><td>Season 1 Day 1 - Season 13 Elections (shadowed)<br>Season 13 Elections - Season 16 Day 99 (batter)<br>Season 17 Elections - Season 22 Elections (batter)<br></td></tr><tr><td>Ziwa Mueller</td><td>Season 22 Elections - Season 24 Day 22 (batter)<br></td></tr><tr><td>Bones Piazza</td><td>Season 19 Day 99 - Season 21 Day 86 (shadowed)<br>Season 21 Day 86 - Season 21 Day 93 (batter)<br>Season 21 Day 93 - Season 21 Elections (shadowed)<br>Season 21 Elections - Season 22 Day 49 (batter)<br>Season 22 Day 49 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Rey Wooten</td><td>Season 1 Day 1 - Season 21 Day 93 (shadowed)<br>Season 21 Day 93 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Goodwin Morin II</td><td>Season 19 Day 73 - Season 19 Elections (batter)<br></td></tr><tr><td>Eizabeth Elliott</td><td>Season 1 Day 1 - Season 16 Elections (batter)<br>Season 16 Elections - Season 18 Elections (shadowed)<br>Season 18 Elections - Season 20 Day 32 (batter)<br>Season 20 Day 32 - Season 23 Day 87 (batter)<br>Season 23 Day 87 - Season 23 Day 98 (shadowed)<br>Season 23 Day 98 - Season 24 Day 38 (pitcher)<br>Season 24 Day 38 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Oscar Dollie</td><td>Season 1 Day 1 - Season 16 Day 97 (batter)<br></td></tr><tr><td>Evelton McBlase II</td><td>Season 18 Elections - Season 19 Elections (batter)<br></td></tr><tr><td>Jesús Koch</td><td>Season 20 Day 36 - Season 24 Elections (batter)<br></td></tr><tr><td>Yeong-Ho Garcia</td><td>Season 1 Day 1 - Season 12 Day 12 (pitcher)<br></td></tr><tr><td>Jaylen Hotdogfingers</td><td>Season 12 Day 12 - Season 12 Day 56 (pitcher)<br>Season 17 Day 79 - Season 17 Day 90 (pitcher)<br></td></tr><tr><td>James Mora</td><td>Season 12 Day 56 - Season 16 Elections (pitcher)<br>Season 16 Elections - Season 21 Day 99 (batter)<br></td></tr><tr><td>Logan Rodriguez</td><td>Season 1 Day 1 - Season 16 Day 30 (pitcher)<br>Season 16 Day 30 - Season 18 Elections (batter)<br>Season 19 Elections - Season 21 Day 81 (batter)<br>Season 21 Day 81 - Season 22 Elections (shadowed)<br>Season 22 Elections - Season 23 Day 48 (batter)<br>Season 23 Day 48 - Season 23 Day 73 (shadowed)<br>Season 23 Day 73 - Season 24 Day 99 (pitcher)<br></td></tr><tr><td>Wyatt Pothos</td><td>Season 18 Elections - Season 19 Elections (batter)<br></td></tr><tr><td>Alx Keming</td><td>Season 22 Elections - Season 23 Day 48 (shadowed)<br>Season 23 Day 48 - Season 24 Day 91 (batter)<br>Season 24 Day 91 - Season 24 Day 99 (shadowed)<br></td></tr><tr><td>Atlas Diaz</td><td>Season 1 Day 1 - Season 24 Day 91 (shadowed)<br>Season 24 Day 91 - Season 24 Day 99 (batter)<br></td></tr><tr><td>Inky Rutledge</td><td>Season 1 Day 1 - Season 17 Day 79 (pitcher)<br></td></tr><tr><td>Cravel Gesundheit</td><td>Season 17 Day 90 - Season 23 Day 98 (pitcher)<br>Season 23 Day 98 - Season 24 Day 38 (shadowed)<br>Season 24 Day 38 - Season 24 Day 99 (pitcher)<br></td></tr><tr><td>Curry Aliciakeyes</td><td>Season 1 Day 1 - Season 24 Day 99 (pitcher)<br></td></tr><tr><td>Famous Oconnor</td><td>Season 1 Day 1 - Season 2 Day 65 (pitcher)<br></td></tr><tr><td>Cory Twelve</td><td>Season 2 Day 65 - Season 12 Elections (pitcher)<br></td></tr><tr><td>King Weatherman</td><td>Season 12 Elections - Season 23 Day 73 (pitcher)<br>Season 23 Day 73 - Season 23 Day 80 (shadowed)<br>Season 23 Day 80 - Season 24 Day 99 (pitcher)<br></td></tr></table></noscript>
+		
+		<script>
+			//create the graph svg...
+			var svg = makeSVG();
+			
+			//draw those parts of the graph that do not change depending on sorting
+			drawStaticPartsOfTheGraph();
+			
+			//copy the names into the sortedNames array, then call the method that draws the Y axis, the bars, and recreate the table
+			sortedNames = names.slice(0, names.length);
+			drawTenuresWithSorting();
+			
+		</script>
+		</main>
+	</body>
+</html>
