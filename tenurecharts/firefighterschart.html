@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Chicago Firefighters roster changes Seasons 1-24</title>
+	<head>
+		<script src="https://d3js.org/d3.v4.js"></script>
+		
+		<script src="data/general_data.js"></script>
+		<script src="data/firefighters_data.js"></script>
+		
+		<script src="script/utility.js"></script>
+		<script src="script/charting.js"></script>
+		<script src="script/sorting.js"></script>
+		
+		<link rel="stylesheet" href="style.css">
+	</head>
+	
+	
+	<body>
+		<main>
+			<h1 style="margin: 30px">Chicago Firefighters roster changes S1-S24</h1>
+						
+			<div class="pad-left">
+				<label for="sort">Roster sorting order:</label>
+				<!-- the first option is the "default/initial" one. If you want to change the default, just reorder the options here -->
+				<select name="sort" id="sort" onChange="drawTenuresWithSorting()">
+					<option value="ORIG_ROSTER">Roster order in Season 1, roster changes cascading</option>
+					<option value="ALPHABETIC">Alphabetically by first name</option>
+					
+					<option value="FIRST_ORIG">First appearance on roster, then by roster order in Season 1</option>
+					<option value="FIRST_ALPHA">First appearance on roster, then alphabetically</option>
+					
+					<option value="LAST_ORIG">Latest appearance on roster, then by roster order in Season 1</option>
+					<option value="LAST_ALPHA">Latest appearance on roster, then alphabetically</option>
+					
+					<option value="LONGEST_ORIG">Longest time on roster, then by roster order in Season 1</option>
+					<option value="LONGEST_ALPHA">Longest time on roster, then alphabetically</option>
+				</select>
+				
+				<label for="shadowed"> Including time in shadows:</label>
+				<input type="checkbox" id="shadowed" name="shadowed" value="true" onChange="drawTenuresWithSorting()">
+			</div>
+			<details class="pad-left">
+					<summary>Notes about sorting</summary>
+					<p>"Roster order in Season 1, roster changes cascading" sorting option attempts to give a kind of overview of who replaced whom - if a Season 1 player A feedbacked for player B and then B was equivalent exchanged with C later, then A, B and C should be after one another. It's not perfect - the players who have left the team and come back mess it up something fierce, but an attempt was made.</p>
+					<p>For "longest time on the roster" options, note that it orders the players by the number of <em>days</em> on the roster, not seasons. Because the seasons have slightly different lengths, the order of players who spent, for example, one season on the roster may not look intuitive at first glance.</p>
+				</details>
+			
+			<div id="colorLegend" aria-hidden="true"></div>
+			
+			<div id="tenureGraph"></div>
+		
+			<p>Not included in the graph (or in the table): anyone who has been on Firefighters roster for less than a full day, anyone who has not actively played for the Firefighters.</p>
+			<p>Data compiled from the <a href="https://blaseball.wiki/">Blaseball Wiki</a> and <a href="https://before.sibr.dev/">Before</a>.</p>
+			
+			<h2>Graph data in a table:</h2>
+			
+			<details>
+				<summary>Click to show</summary>
+				<div id="dataTable"></div>
+			</details>
+			
+			<noscript></noscript>
+		
+		<script>
+			//create the graph svg...
+			var svg = makeSVG();
+			
+			//draw those parts of the graph that do not change depending on sorting
+			drawStaticPartsOfTheGraph();
+			
+			//copy the names into the sortedNames array, then call the method that draws the Y axis, the bars, and recreate the table
+			sortedNames = names.slice(0, names.length);
+			drawTenuresWithSorting();
+		</script>
+		</main>
+	</body>
+</html>
