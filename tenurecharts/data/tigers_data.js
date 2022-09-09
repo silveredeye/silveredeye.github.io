@@ -21,7 +21,10 @@ const names = ['Fish Summer', 'Richmond Harrison',
 			   'Hiroto Wilcox', 'Lenny Marijuana', 'Siobhan Chark', 'Walton Sports',
 			   'Dunlap Figueroa', 'NaN',
 			   'Famous Owens',
-			   'Mags Banananana'
+			   'Baldwin Breadwinner',
+			   'Chorby Short',
+			   'Mags Banananana',
+			   'Castillo Turner'
 ];
 			
 //this is the data that will make the boxes on the graph. order doesn't matter, they'll be ordered by sortedNames, 
@@ -135,8 +138,14 @@ const tenures = [
 	{'player': 'Famous Owens', 'startSeason': 1, 'startDay': 1, 'endSeason': 19, 'endDay': 'E', pitcher: true},
 	{'player': 'Famous Owens', 'startSeason': 19, 'startDay': 'E', 'endSeason': 21, 'endDay': 114, shadowed: true},
 	{'player': 'Famous Owens', 'startSeason': 21, 'startDay': 114, 'endSeason': 24, 'endDay': 99},
+	
+	{'player': 'Baldwin Breadwinner', 'startSeason': 22, 'startDay': 99, 'endSeason': 22, 'endDay': 108, pitcher: true},
 
+	{'player': 'Chorby Short', 'startSeason': 23, 'startDay': 18, 'endSeason': 23, 'endDay': 27, pitcher: true},
+	
 	{'player': 'Mags Banananana', 'startSeason': 23, 'startDay': 'E', 'endSeason': 24, 'endDay': 99, pitcher: true},
+	
+	{'player': 'Castillo Turner', 'startSeason': 24, 'startDay': 27, 'endSeason': 24, 'endDay': 36, pitcher: true},
 ]
 
 //batter and pitcher colors are selected from the Team Wiki page, shadowed is just a nice gray
